@@ -1,4 +1,4 @@
-package com.azure.models;
+package com.rsa.redchallenge.standaloneapp.azure;
 
 import com.microsoft.windowsazure.Configuration;
 import com.microsoft.windowsazure.exception.ServiceException;
@@ -59,7 +59,6 @@ public class QueueBuilder implements ApplicationListener<ContextRefreshedEvent> 
         } catch (ServiceException e) {
             log.error("ServiceException encountered: ");
             log.error(e.getMessage());
-            System.exit(-1);
         }
         try {
             Thread.sleep(15000);

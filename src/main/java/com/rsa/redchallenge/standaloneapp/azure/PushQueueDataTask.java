@@ -1,4 +1,4 @@
-package com.azure.models;
+package com.rsa.redchallenge.standaloneapp.azure;
 
 import com.microsoft.windowsazure.Configuration;
 import com.microsoft.windowsazure.exception.ServiceException;
@@ -9,6 +9,7 @@ import com.microsoft.windowsazure.services.servicebus.models.BrokeredMessage;
 import com.microsoft.windowsazure.services.servicebus.models.CreateQueueResult;
 import com.microsoft.windowsazure.services.servicebus.models.ListQueuesResult;
 import com.microsoft.windowsazure.services.servicebus.models.QueueInfo;
+import com.rsa.redchallenge.standaloneapp.model.AzureResponseObject;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -18,7 +19,6 @@ import java.net.URLEncoder;
 import java.sql.Date;
 import java.sql.Timestamp;
 import java.util.Base64;
-import com.azure.models.model.AzureResponseObject;
 
 /**
  * Created by kars2 on 2/29/16.

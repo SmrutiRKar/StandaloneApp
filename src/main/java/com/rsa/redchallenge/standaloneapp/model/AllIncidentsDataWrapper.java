@@ -1,4 +1,4 @@
-package com.azure.models.model;
+package com.rsa.redchallenge.standaloneapp.model;
 
 import org.codehaus.jackson.map.annotate.JsonSerialize;
 

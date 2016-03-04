@@ -1,4 +1,4 @@
-package com.azure.models.model;
+package com.rsa.redchallenge.standaloneapp.model;
 
 import java.sql.Date;
 import java.sql.Timestamp;

@@ -1,7 +1,7 @@
-package com.azure.models;
+package com.rsa.redchallenge.standaloneapp.azure;
 
-import com.azure.models.model.AzureRequestObject;
-import com.azure.models.model.AzureResponseObject;
+import com.rsa.redchallenge.standaloneapp.model.AzureRequestObject;
+import com.rsa.redchallenge.standaloneapp.model.AzureResponseObject;
 import com.microsoft.windowsazure.exception.ServiceException;
 import com.microsoft.windowsazure.services.servicebus.ServiceBusContract;
 import com.microsoft.windowsazure.services.servicebus.models.BrokeredMessage;

@@ -1,4 +1,4 @@
-package com.azure.models.constants;
+package com.rsa.redchallenge.standaloneapp.constants;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -9,6 +9,8 @@ import java.util.Map;
 public class ApplicationConstant {
 
     public static HashMap<String, HashMap<String, String>> sessionIdMapByApplicationUser = new HashMap<String, HashMap<String, String>>();
+
+    public static String SA_BASE_URL = "https://10.31.252.122/";
 
     // Declare all the URL's here
 }

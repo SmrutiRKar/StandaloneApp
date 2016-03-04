@@ -1,9 +1,10 @@
-package com.azure.models;
+package com.rsa.redchallenge.standaloneapp;
 
-import com.azure.models.rest.LoginLogoutRestHandler;
 import org.apache.commons.daemon.Daemon;
 import org.apache.commons.daemon.DaemonContext;
 import org.apache.commons.daemon.DaemonInitException;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import java.util.Timer;
 
@@ -13,26 +14,27 @@ import java.util.Timer;
 public class Main implements Daemon{
 
     private static Timer timer = null;
+    final static Log logger = LogFactory.getLog(Main.class);
 
     public static void initializeQueue() {
         //new QueueBuilder().initQueue();
-        System.out.print(new LoginLogoutRestHandler().login());
+       // System.out.print(new LoginLogoutHelper().login());
     }
 
     @Override
     public void init(DaemonContext dc) throws DaemonInitException, Exception {
-        System.out.println("initializing ...");
+        logger.info("initializing ...");
     }
 
     @Override
     public void start() throws Exception {
-        System.out.println("starting ...");
+        logger.info("starting ...");
         initializeQueue();
     }
 
     @Override
     public void stop() throws Exception {
-        System.out.println("stopping ...");
+        logger.info("stopping ...");
         if (timer != null) {
             timer.cancel();
         }
@@ -40,7 +42,7 @@ public class Main implements Daemon{
 
     @Override
     public void destroy() {
-        System.out.println("done.");
+        logger.info("done.");
     }
 
 }

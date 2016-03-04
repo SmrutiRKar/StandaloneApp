@@ -1,9 +1,9 @@
-package com.azure.models.model;
+package com.rsa.redchallenge.standaloneapp.model;
 
 /**
  * Created by kars2 on 2/29/16.
  */
-public class RequestOperation {
+public class AzureRequestObject {
 
     private String requestOperation;
     private String requestParams;

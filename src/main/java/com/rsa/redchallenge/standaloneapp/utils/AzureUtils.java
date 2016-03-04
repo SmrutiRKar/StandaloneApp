@@ -1,4 +1,4 @@
-package com.azure.models.utils;
+package com.rsa.redchallenge.standaloneapp.utils;
 
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;

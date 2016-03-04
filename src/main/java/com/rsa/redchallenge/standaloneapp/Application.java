@@ -1,6 +1,5 @@
-package config;
+package com.rsa.redchallenge.standaloneapp;
 
-import com.azure.models.Main;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
@@ -12,11 +11,10 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 public class Application {
 
     public static void main(String[] args) {
-        System.out.print("Application's main class called");
         SpringApplication.run(Application.class, args);
 
         // Call for initializinf queue
-        Main.initializeQueue();
+        //Main.initializeQueue();
     }
 
 }

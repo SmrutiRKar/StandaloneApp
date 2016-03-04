@@ -1,6 +1,6 @@
-package com.azure.models;
+package com.rsa.redchallenge.standaloneapp.azure;
 
-import com.azure.models.model.AzureRequestObject;
+import com.rsa.redchallenge.standaloneapp.model.AzureRequestObject;
 import org.springframework.context.ApplicationContext;
 
 import java.util.Calendar;
