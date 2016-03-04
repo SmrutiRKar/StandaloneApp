@@ -43,9 +43,9 @@ public class QueueBuilder implements ApplicationListener<ContextRefreshedEvent> 
     public void initQueue() {
         Configuration config =
                 ServiceBusConfiguration.configureWithSASAuthentication(
-                        "SMT-SERVICE-BUS-1",
+                        "saappservicebus",
                         "RootManageSharedAccessKey",
-                        "q+4rYIBoEPNICYMBV2roAP5XWhlT0hJaCD/zcZ9nwps=",
+                        "RtI+FcVtOsbQQv8uCfvJHyXzzMgUb1USHRENbwTD2e8=",
                         ".servicebus.windows.net"
                 );
 
@@ -53,7 +53,7 @@ public class QueueBuilder implements ApplicationListener<ContextRefreshedEvent> 
         try {
             ListQueuesResult listQueuesResult = service.listQueues();
             if (listQueuesResult.getItems().size() == 0) {
-                queueInfo = new QueueInfo("TestQueue1");
+                queueInfo = new QueueInfo("RequestQueue");
                 CreateQueueResult result = service.createQueue(queueInfo);
             }
         } catch (ServiceException e) {
