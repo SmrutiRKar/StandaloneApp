@@ -12,6 +12,7 @@ import com.microsoft.windowsazure.services.servicebus.models.QueueInfo;
 import com.rsa.redchallenge.standaloneapp.model.AzureResponseObject;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;

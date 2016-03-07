@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
+import org.springframework.stereotype.Component;
 
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -23,6 +24,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * Created by kars2 on 2/29/16.
  */
+@Component
 public class QueueBuilder implements ApplicationListener<ContextRefreshedEvent> {
 
     @Autowired
@@ -72,6 +74,7 @@ public class QueueBuilder implements ApplicationListener<ContextRefreshedEvent> 
             log.info("security context :" + SecurityContextHolder.getContext() + " Auth is:" + SecurityContextHolder.getContext().getAuthentication());
             authObj = SecurityContextHolder.getContext().getAuthentication();
         }*/
+        System.out.print("## applicationContext is " +applicationContext);
         PullQueueDataTask pullQueueDataTask = (PullQueueDataTask)applicationContext.getBean("PullQueueDataTask",service);
         // tpl.execute(pullQueueDataTask);
         spl.scheduleAtFixedRate(pullQueueDataTask, 0, 500, TimeUnit.MILLISECONDS);
@@ -79,6 +82,7 @@ public class QueueBuilder implements ApplicationListener<ContextRefreshedEvent> 
 
     @Override
     public void onApplicationEvent(ContextRefreshedEvent contextRefreshedEvent) {
+        System.out.println("## when application loads");
         initQueue();
         log.info("Application context is "+applicationContext);
     }

@@ -1,5 +1,6 @@
 package com.rsa.redchallenge.standaloneapp;
 
+import com.rsa.redchallenge.standaloneapp.azure.QueueBuilder;
 import org.apache.commons.daemon.Daemon;
 import org.apache.commons.daemon.DaemonContext;
 import org.apache.commons.daemon.DaemonInitException;

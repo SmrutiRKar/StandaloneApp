@@ -44,6 +44,9 @@ public class PullQueueDataTask implements Runnable {
     @Autowired
     ApplicationContext applicationContext;
 
+    @Autowired
+    private ParseRequestFactory parseRequestFactory;
+
     public PullQueueDataTask(ServiceBusContract service) {
         this.service = service;
         //this.auth = auth;
@@ -120,7 +123,7 @@ public class PullQueueDataTask implements Runnable {
             azureRequestObject.setRequestParams(jsonObj.getString("requestParams"));
             azureRequestObject.setRequestPayload(jsonObj.getString("requestPayload"));
             //log.info("Application context in parse in "+applicationContext +" Auth is "+SecurityContextHolder.getContext().getAuthentication());
-            ParseRequestFactory.parse(azureRequestObject,applicationContext);
+            parseRequestFactory.parse(azureRequestObject);
         } catch (Exception e) {
             e.printStackTrace();
         }

@@ -41,9 +41,9 @@ import java.util.List;
 public class LoginLogoutHelper {
 
 
-    final static Log logger = LogFactory.getLog(LoginLogoutHelper.class);
+        final static Log logger = LogFactory.getLog(LoginLogoutHelper.class);
 
-  public  String loginSA(String usn,String pwd) throws Exception {
+        public String loginSA(String usn,String pwd) throws Exception {
 
         try {
             HttpMessageConverter<MultiValueMap<String, ?>> formHttpMessageConverter = new FormHttpMessageConverter();

@@ -13,6 +13,7 @@ import org.apache.http.impl.conn.PoolingClientConnectionManager;
 import org.springframework.http.*;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 
+import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpClientErrorException;
 
 import org.springframework.web.client.RestClientException;
@@ -33,6 +34,7 @@ import java.util.Map;
  * Created by anjana on 3/4/16.
  */
 
+@Component
 public class RestInteractor {
 
     final static Log logger = LogFactory.getLog(RestInteractor.class);
