@@ -33,9 +33,9 @@ public class PushQueueDataTask {
     public static void initQueue(String params) {
         Configuration config =
                 ServiceBusConfiguration.configureWithSASAuthentication(
-                        "SMT-SERVICE-BUS-1",
+                        "saappservicebus",
                         "RootManageSharedAccessKey",
-                        "q+4rYIBoEPNICYMBV2roAP5XWhlT0hJaCD/zcZ9nwps=",
+                        "RtI+FcVtOsbQQv8uCfvJHyXzzMgUb1USHRENbwTD2e8=",
                         ".servicebus.windows.net"
                 );
 
@@ -43,7 +43,7 @@ public class PushQueueDataTask {
         try {
             ListQueuesResult listQueuesResult = service.listQueues();
             if (listQueuesResult.getItems().size() == 0) {
-                queueInfo = new QueueInfo("TestQueue");
+                queueInfo = new QueueInfo("ResponseQueue");
                 CreateQueueResult result = service.createQueue(queueInfo);
             }
         } catch (ServiceException e) {
