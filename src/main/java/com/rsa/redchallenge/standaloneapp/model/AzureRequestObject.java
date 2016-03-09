@@ -8,6 +8,7 @@ public class AzureRequestObject {
     private String requestOperation;
     private String requestParams;
     private String requestPayload;
+    private String requestUser;
 
     public String getRequestOperation() {
         return requestOperation;
@@ -33,12 +34,21 @@ public class AzureRequestObject {
         this.requestPayload = requestPayload;
     }
 
+    public String getRequestUser() {
+        return requestUser;
+    }
+
+    public void setRequestUser(String requestUser) {
+        this.requestUser = requestUser;
+    }
+
     @Override
     public String toString() {
-        return "RequestOperation{" +
+        return "AzureRequestObject{" +
                 "requestOperation='" + requestOperation + '\'' +
                 ", requestParams='" + requestParams + '\'' +
                 ", requestPayload='" + requestPayload + '\'' +
+                ", requestUser='" + requestUser + '\'' +
                 '}';
     }
 }

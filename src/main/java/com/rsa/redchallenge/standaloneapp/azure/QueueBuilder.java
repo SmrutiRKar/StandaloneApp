@@ -8,6 +8,7 @@ import com.microsoft.windowsazure.services.servicebus.ServiceBusService;
 import com.microsoft.windowsazure.services.servicebus.models.CreateQueueResult;
 import com.microsoft.windowsazure.services.servicebus.models.ListQueuesResult;
 import com.microsoft.windowsazure.services.servicebus.models.QueueInfo;
+import com.rsa.redchallenge.standaloneapp.constants.ApplicationConstant;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,10 +31,10 @@ public class QueueBuilder implements ApplicationListener<ContextRefreshedEvent> 
     @Autowired
     ApplicationContext applicationContext;
 
+
     private static QueueInfo queueInfo = null;
-    private static ThreadPoolExecutor tpl = (ThreadPoolExecutor) Executors.newCachedThreadPool();
     private static ScheduledExecutorService spl = Executors.newScheduledThreadPool(30);
-    private static final Log log = LogFactory.getLog(PushQueueDataTask.class);
+    private static final Log log = LogFactory.getLog(QueueBuilder.class);
 
     public QueueInfo getQueueInfo() {
         if (queueInfo == null) {
@@ -45,9 +46,9 @@ public class QueueBuilder implements ApplicationListener<ContextRefreshedEvent> 
     public void initQueue() {
         Configuration config =
                 ServiceBusConfiguration.configureWithSASAuthentication(
-                        "saappservicebus",
-                        "RootManageSharedAccessKey",
-                        "RtI+FcVtOsbQQv8uCfvJHyXzzMgUb1USHRENbwTD2e8=",
+                        ApplicationConstant.AZURE_BUS_NAME,
+                        ApplicationConstant.AZURE_SHARED_POLICY_NAME,
+                        ApplicationConstant.AZURE_KEY,
                         ".servicebus.windows.net"
                 );
 
@@ -55,7 +56,7 @@ public class QueueBuilder implements ApplicationListener<ContextRefreshedEvent> 
         try {
             ListQueuesResult listQueuesResult = service.listQueues();
             if (listQueuesResult.getItems().size() == 0) {
-                queueInfo = new QueueInfo("RequestQueue");
+                queueInfo = new QueueInfo(ApplicationConstant.AZURE_REQUEST_QUEUE);
                 CreateQueueResult result = service.createQueue(queueInfo);
             }
         } catch (ServiceException e) {
@@ -67,22 +68,16 @@ public class QueueBuilder implements ApplicationListener<ContextRefreshedEvent> 
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        //Authentication authObj = SecurityContextHolder.getContext().getAuthentication();
-        //log.info("Auth Obj is "+authObj + " App context is "+applicationContext);
-        /*if(authObj == null){
-            SecurityUtil.escalateUserForPrivilegedDeviceConnection(SecurityContextHolder.getContext());
-            log.info("security context :" + SecurityContextHolder.getContext() + " Auth is:" + SecurityContextHolder.getContext().getAuthentication());
-            authObj = SecurityContextHolder.getContext().getAuthentication();
-        }*/
-        System.out.print("## applicationContext is " +applicationContext);
+
+        log.info("## applicationContext is " +applicationContext);
         PullQueueDataTask pullQueueDataTask = (PullQueueDataTask)applicationContext.getBean("PullQueueDataTask",service);
-        // tpl.execute(pullQueueDataTask);
+        log.info("## starting to poll the request queue every 500 ms");
         spl.scheduleAtFixedRate(pullQueueDataTask, 0, 500, TimeUnit.MILLISECONDS);
     }
 
     @Override
     public void onApplicationEvent(ContextRefreshedEvent contextRefreshedEvent) {
-        System.out.println("## when application loads");
+        log.info("## onApplicationEvent loads");
         initQueue();
         log.info("Application context is "+applicationContext);
     }

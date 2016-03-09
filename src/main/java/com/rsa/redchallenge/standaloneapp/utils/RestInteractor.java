@@ -1,5 +1,7 @@
 package com.rsa.redchallenge.standaloneapp.utils;
 
+import com.rsa.redchallenge.standaloneapp.constants.ApplicationConstant;
+import org.apache.catalina.util.URLEncoder;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.conn.ClientConnectionManager;
@@ -28,6 +30,7 @@ import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -60,7 +63,7 @@ public class RestInteractor {
         logger.info("performing get request for uri:"+uri);
         HttpEntity<String> request = new HttpEntity<>(headers);
         try {
-            T result = restTemplate.exchange(uri, HttpMethod.GET, request, response).getBody();
+            T result = restTemplate.exchange(uri, HttpMethod.GET, request, response,getObjectParams(params)).getBody();
             return result;
         } catch (HttpClientErrorException e) {
             throw  e;
@@ -117,27 +120,51 @@ public class RestInteractor {
         return uri;
     }
 
+    private static Object[] getObjectParams(Map<String, Object> params) {
+        //RestTemplate considers curly braces {...} in the given URL as a placeholder for URI variables and tries to replace them based on their name
+        //hence passing the values as it gets replaced by {}
+        if (params != null && !params.isEmpty()) {
+            return params.values().toArray();
+        }
+        return new Object[0];
+    }
+
+//    public static void main(String[] args) throws Exception{
+//        Map<String, Object> params =  new HashMap<>();
+//        params.put("requestParams","{\"property\":\"priority\",\"value\":[\"CRITICAL\"]}");
+//
+//        String jsid = new LoginLogoutHelper().loginSA("admin","netwitness");
+//              String path = "http://localhost:9191/ios/incidents/summary";
+//        String respons = performGet(String.class,path,params,jsid);
+//        System.out.println(respons);
+//    }
+
 
     private static DefaultHttpClient getHttpClient() {
-        TrustStrategy acceptingTrustStrategy = new TrustStrategy() {
-            @Override
-            public boolean isTrusted(X509Certificate[] x509Certificates, String s) throws CertificateException {
-                return false;
+
+        if(ApplicationConstant.SA_BASE_URL.contains("https")) {
+            TrustStrategy acceptingTrustStrategy = new TrustStrategy() {
+                @Override
+                public boolean isTrusted(X509Certificate[] x509Certificates, String s) throws CertificateException {
+                    return false;
+                }
+            };
+
+            SSLSocketFactory sf = null;
+            try {
+                sf = new SSLSocketFactory(acceptingTrustStrategy, SSLSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER);
+            } catch (NoSuchAlgorithmException | UnrecoverableKeyException | KeyStoreException | KeyManagementException e) {
+                e.printStackTrace();
             }
-        };
 
-        SSLSocketFactory sf = null;
-        try {
-            sf = new SSLSocketFactory(acceptingTrustStrategy, SSLSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER);
-        } catch (NoSuchAlgorithmException | UnrecoverableKeyException | KeyStoreException | KeyManagementException e) {
-            e.printStackTrace();
+            SchemeRegistry registry = new SchemeRegistry();
+            registry.register(new Scheme("https", 443, sf));
+            ClientConnectionManager ccm = new PoolingClientConnectionManager(registry);
+
+            return new DefaultHttpClient(ccm);
+        } else {
+            return new DefaultHttpClient();
         }
-
-        SchemeRegistry registry = new SchemeRegistry();
-        registry.register(new Scheme("https", 443, sf));
-        ClientConnectionManager ccm = new PoolingClientConnectionManager(registry);
-
-        return new DefaultHttpClient(ccm);
     }
 
     private static void setFactory(RestTemplate restTemplate) {

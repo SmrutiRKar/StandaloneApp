@@ -6,6 +6,8 @@ import org.apache.commons.daemon.DaemonContext;
 import org.apache.commons.daemon.DaemonInitException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 
 import java.util.Timer;
 
@@ -14,11 +16,14 @@ import java.util.Timer;
  */
 public class Main implements Daemon{
 
+
+    private ApplicationContext applicationContext;
+
     private static Timer timer = null;
     final static Log logger = LogFactory.getLog(Main.class);
 
     public static void initializeQueue() {
-        //new QueueBuilder().initQueue();
+           // applicationContext.getBean(QueueBuilder.class).initQueue();
        // System.out.print(new LoginLogoutHelper().login());
     }
 

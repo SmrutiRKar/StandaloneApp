@@ -1,5 +1,6 @@
 package com.rsa.redchallenge.standaloneapp.azure;
 
+import com.rsa.redchallenge.standaloneapp.constants.ApplicationConstant;
 import com.rsa.redchallenge.standaloneapp.model.AzureRequestObject;
 import com.rsa.redchallenge.standaloneapp.model.AzureResponseObject;
 import com.microsoft.windowsazure.exception.ServiceException;
@@ -49,24 +50,11 @@ public class PullQueueDataTask implements Runnable {
 
     public PullQueueDataTask(ServiceBusContract service) {
         this.service = service;
-        //this.auth = auth;
-
-        /*if(this.auth == null) {
-            log.info("security context :" + SecurityContextHolder.getContext() + " Auth is:" + SecurityContextHolder.getContext().getAuthentication());
-            SecurityUtil.escalateUserForPrivilegedDeviceConnection(SecurityContextHolder.getContext());
-            log.info("security context :" + SecurityContextHolder.getContext() + " Auth is:" + SecurityContextHolder.getContext().getAuthentication());
-            this.auth = SecurityContextHolder.getContext().getAuthentication();
-        }*/
     }
 
     @Override
     public void run() {
         try {
-            /*if(SecurityContextHolder.getContext().getAuthentication() == null){
-                SecurityContextHolder.getContext().setAuthentication(this.auth);
-                log.info("Setting security Authentication...");
-                //SecurityUtil.escalateUserForPrivilegedDeviceConnection(SecurityContextHolder.getContext());
-            }*/
             getMessage(service);
         } catch (Exception e) {
             e.printStackTrace();
@@ -80,10 +68,10 @@ public class PullQueueDataTask implements Runnable {
 
             while (true) {
                 ReceiveQueueMessageResult resultQM =
-                        service.receiveQueueMessage("TestQueue1", opts);
+                        service.receiveQueueMessage(ApplicationConstant.AZURE_REQUEST_QUEUE, opts);
                 BrokeredMessage message = resultQM.getValue();
                 if (message != null && message.getMessageId() != null) {
-                    byte[] b = new byte[2000];
+                    byte[] b = new byte[9000];
                     String s = null;
                     int numRead = message.getBody().read(b);
                     String finalString = "";
@@ -93,7 +81,7 @@ public class PullQueueDataTask implements Runnable {
                         finalString += s;
                         numRead = message.getBody().read(b);
                     }
-                    log.info(finalString);
+                    log.info("received msg from queue:"+finalString);
                     if (StringUtils.isNotBlank(finalString)) {
                         process(finalString);
                     }
@@ -122,43 +110,13 @@ public class PullQueueDataTask implements Runnable {
             azureRequestObject.setRequestOperation(jsonObj.getString("requestOperation"));
             azureRequestObject.setRequestParams(jsonObj.getString("requestParams"));
             azureRequestObject.setRequestPayload(jsonObj.getString("requestPayload"));
-            //log.info("Application context in parse in "+applicationContext +" Auth is "+SecurityContextHolder.getContext().getAuthentication());
+            azureRequestObject.setRequestUser(jsonObj.getString("requestUser"));
+            log.info("processing the request for mobile request: "+azureRequestObject);
             parseRequestFactory.parse(azureRequestObject);
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-
-    public static void post(String xml) throws Exception {
-        DefaultHttpClient client = new DefaultHttpClient();
-        HttpPost post = new HttpPost("https://msrsa.azure-mobile.net/api/completeall");
-        AzureResponseObject responseObject = new AzureResponseObject();
-        responseObject.setCreatedAt(new Date(System.currentTimeMillis()));
-        responseObject.setUpdatedAt(new Date(System.currentTimeMillis()));
-        responseObject.setVersion(new Timestamp(System.currentTimeMillis()));
-        responseObject.setDeleted(Boolean.FALSE);
-        responseObject.setMobileId("SAMobile1");
-        responseObject.setJsonResponse(xml);
-
-        ObjectMapper mapper = new ObjectMapper();
-        String jsonInString = mapper.writeValueAsString(responseObject);
-        HttpEntity entity = new ByteArrayEntity(jsonInString.getBytes("UTF-8"));
-        post.setEntity(entity);
-
-        HttpResponse response = client.execute(post);
-
-        String result = EntityUtils.toString(response.getEntity());
-    }
-
-    public static void post() throws Exception {
-        HttpClient client = new DefaultHttpClient();
-        HttpPost post = new HttpPost("https://msrsa.azure-mobile.net/api/completeall");
-        String xml = "{ \"name\":\"HIGH\",\"count\":\"0\"}";
-        HttpEntity entity = new ByteArrayEntity(xml.getBytes("UTF-8"));
-        post.setEntity(entity);
-        HttpResponse response = client.execute(post);
-        String result = EntityUtils.toString(response.getEntity());
-    }
 
 }

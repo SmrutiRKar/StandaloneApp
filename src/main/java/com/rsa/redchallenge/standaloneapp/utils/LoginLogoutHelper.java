@@ -43,7 +43,7 @@ public class LoginLogoutHelper {
 
         final static Log logger = LogFactory.getLog(LoginLogoutHelper.class);
 
-        public String loginSA(String usn,String pwd) throws Exception {
+        public static String loginSA(String usn,String pwd) throws Exception {
 
         try {
             HttpMessageConverter<MultiValueMap<String, ?>> formHttpMessageConverter = new FormHttpMessageConverter();
@@ -81,7 +81,7 @@ public class LoginLogoutHelper {
         }
     }
 
-    public void logoutSA(String sessionId) {
+    public static void logoutSA(String sessionId) {
         String uri = ApplicationConstant.SA_BASE_URL+ "j_spring_security_logout";
         RestTemplate restTemplate = new RestTemplate(new HttpComponentsClientHttpRequestFactory());
         setFactory(restTemplate);
@@ -109,31 +109,35 @@ public class LoginLogoutHelper {
 //
 //    }
 
-    private  void setFactory(RestTemplate restTemplate) {
+    private static void setFactory(RestTemplate restTemplate) {
         //if (configuration.getActivationServerPath().contains("https://"))
             restTemplate.setRequestFactory(new HttpComponentsClientHttpRequestFactory(getHttpClient()));
     }
 
-    private  DefaultHttpClient getHttpClient() {
-        TrustStrategy acceptingTrustStrategy = new TrustStrategy() {
-            @Override
-            public boolean isTrusted(X509Certificate[] x509Certificates, String s) throws CertificateException {
-                return false;
+    private static  DefaultHttpClient getHttpClient() {
+        if(ApplicationConstant.SA_BASE_URL.contains("https")) {
+            TrustStrategy acceptingTrustStrategy = new TrustStrategy() {
+                @Override
+                public boolean isTrusted(X509Certificate[] x509Certificates, String s) throws CertificateException {
+                    return false;
+                }
+            };
+
+            SSLSocketFactory sf = null;
+            try {
+                sf = new SSLSocketFactory(acceptingTrustStrategy, SSLSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER);
+            } catch (NoSuchAlgorithmException | UnrecoverableKeyException | KeyStoreException | KeyManagementException e) {
+                e.printStackTrace();
             }
-        };
 
-        SSLSocketFactory sf = null;
-        try {
-            sf = new SSLSocketFactory(acceptingTrustStrategy, SSLSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER);
-        } catch (NoSuchAlgorithmException | UnrecoverableKeyException | KeyStoreException | KeyManagementException e) {
-            e.printStackTrace();
+            SchemeRegistry registry = new SchemeRegistry();
+            registry.register(new Scheme("https", 443, sf));
+            ClientConnectionManager ccm = new PoolingClientConnectionManager(registry);
+
+            return new DefaultHttpClient(ccm);
+        } else{
+            return new DefaultHttpClient();
         }
-
-        SchemeRegistry registry = new SchemeRegistry();
-        registry.register(new Scheme("https", 443, sf));
-        ClientConnectionManager ccm = new PoolingClientConnectionManager(registry);
-
-        return new DefaultHttpClient(ccm);
     }
 
 }

@@ -1,5 +1,7 @@
 package com.rsa.redchallenge.standaloneapp.constants;
 
+import com.rsa.redchallenge.standaloneapp.model.UserSession;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -8,9 +10,17 @@ import java.util.Map;
  */
 public class ApplicationConstant {
 
-    public static HashMap<String, HashMap<String, String>> sessionIdMapByApplicationUser = new HashMap<String, HashMap<String, String>>();
+    public static HashMap<String, UserSession> sessionIdMapByApplicationUser = new HashMap<String, UserSession>();
 
-    public static String SA_BASE_URL = "https://10.31.252.122/";
+    public static String SA_BASE_URL = "http://localhost:9191/";
+   // public static String SA_BASE_URL = "https://10.31.252.122/";
+    public static String AZURE_BUS_NAME = "saappservicebus";
+    public static String AZURE_BUS_NAME_FULL = "saappservicebus.servicebus.windows.net";
+    public static String AZURE_REQUEST_QUEUE = "requestqueue";
+    public static String AZURE_RESPONSE_QUEUE = "responsequeue";
+    public static String AZURE_NOTIFICATION_QUEUE = "notificationqueue";
+    public static String AZURE_SHARED_POLICY_NAME ="RootManageSharedAccessKey";
+    public static String AZURE_KEY = "RtI+FcVtOsbQQv8uCfvJHyXzzMgUb1USHRENbwTD2e8=";
 
     // Declare all the URL's here
 
@@ -20,4 +30,5 @@ public class ApplicationConstant {
     public static String INCIDENT_BY_ID_URI = "ios/incidents/byid";
     public static String LIVE_INVESTIGATION_SCHEDULER_URI = "liveConnect/investigation/schedule";
     public static String LIVE_MATCHED_IPS_URI = "liveConnect/investigation/matchedIps";
+    public static String SA_TEST_LOGIN = "/ios/incidents/testLogin";
 }

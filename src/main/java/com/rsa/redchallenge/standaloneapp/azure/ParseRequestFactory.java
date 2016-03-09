@@ -2,9 +2,18 @@ package com.rsa.redchallenge.standaloneapp.azure;
 
 import com.rsa.redchallenge.standaloneapp.constants.ApplicationConstant;
 import com.rsa.redchallenge.standaloneapp.model.AzureRequestObject;
+import com.rsa.redchallenge.standaloneapp.model.UserSession;
 import com.rsa.redchallenge.standaloneapp.parsers.IncidentParser;
 import com.rsa.redchallenge.standaloneapp.parsers.LiveConnectorParser;
+import com.rsa.redchallenge.standaloneapp.parsers.SecurityParser;
+import com.rsa.redchallenge.standaloneapp.utils.AzureUtils;
 import com.rsa.redchallenge.standaloneapp.utils.LoginLogoutHelper;
+import com.rsa.redchallenge.standaloneapp.utils.RestInteractor;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.tomcat.jni.User;
+import org.codehaus.jackson.map.ObjectMapper;
+import org.codehaus.jettison.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
@@ -12,6 +21,7 @@ import org.springframework.util.StringUtils;
 
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Map;
 
 /**
  * Created by kars2 on 2/29/16.
@@ -23,26 +33,39 @@ public class ParseRequestFactory {
     private IncidentParser incidentParser;
     @Autowired
     private LiveConnectorParser liveConnectorParser;
-    @Autowired
-    private LoginLogoutHelper loginLogoutHelper;
+
+
+    private static final Log log = LogFactory.getLog(ParseRequestFactory.class);
 
     public void parse(AzureRequestObject azureRequestObject) {
         String responseForQueue = "", sessionId = null;
+        boolean success =  false;
+        String errorMessage = "";
         try {
-            if (azureRequestObject.getRequestOperation().equals("dashboardJson")) {
-                responseForQueue = incidentParser.getJsonIncidents(sessionId);
-            } else if (azureRequestObject.getRequestOperation().equals("incidentSumary")) {
-                responseForQueue = incidentParser.getIncidentSummary(azureRequestObject.getRequestParams(), sessionId);
-            } else if (azureRequestObject.getRequestOperation().equals("individualIncident")) {
-                responseForQueue = incidentParser.getIncidentById(azureRequestObject.getRequestParams(), sessionId);
-            } else if (azureRequestObject.getRequestOperation().equals("modifyIncident")) {
-                responseForQueue = incidentParser.modifyIncident(azureRequestObject.getRequestPayload(), sessionId);
-            }
-
+            sessionId =  getSessionId(azureRequestObject.getRequestUser(),"SA");
+           if(StringUtils.isEmpty(sessionId) && !azureRequestObject.getRequestOperation().equals("loginCheck")){
+               // User session not present!! This should not happen!
+               responseForQueue = "";
+               errorMessage = "Please Login again!";
+           } else {
+               if (azureRequestObject.getRequestOperation().equals("dashboardJson")) {
+                   responseForQueue = incidentParser.getJsonIncidents(sessionId,azureRequestObject.getRequestUser());
+               } else if (azureRequestObject.getRequestOperation().equals("incidentSumary")) {
+                   responseForQueue = incidentParser.getIncidentSummary(azureRequestObject.getRequestParams(), sessionId,azureRequestObject.getRequestUser());
+               } else if (azureRequestObject.getRequestOperation().equals("individualIncident")) {
+                   responseForQueue = incidentParser.getIncidentById(azureRequestObject.getRequestParams(), sessionId,azureRequestObject.getRequestUser());
+               } else if (azureRequestObject.getRequestOperation().equals("modifyIncident")) {
+                   responseForQueue = incidentParser.modifyIncident(azureRequestObject.getRequestPayload(), sessionId,azureRequestObject.getRequestUser());
+               } else if (azureRequestObject.getRequestOperation().equals("loginCheck")) {
+                   responseForQueue = SecurityParser.performLoginCheck(azureRequestObject.getRequestPayload());
+               }
+               success =  true;
+           }
             //Push data to queue
-            PushQueueDataTask.initQueue(responseForQueue);
+            PushQueueDataTask.initQueue(PushQueueDataTask.populateResponseObject(success,errorMessage,responseForQueue));
         } catch (Exception e) {
-            e.printStackTrace();
+           log.error("failed to process request from mobile : ",e);
+            PushQueueDataTask.initQueue(PushQueueDataTask.populateResponseObject(success,e.getMessage(),responseForQueue));
         }
     }
 
@@ -56,19 +79,18 @@ public class ParseRequestFactory {
         return calendar.getTime();
     }
 
-    private String getSessionId(String userName, String applicationName) {
+    private String getSessionId(String userName, String applicationName) throws Exception {
+        String jSessionId = "";
         if(userName == null || applicationName == null) {
             return "";
         }
-        String jSessionId = ApplicationConstant.sessionIdMapByApplicationUser.get(userName).get(applicationName);
-        if(jSessionId == null) {
-            try {
-                jSessionId = loginLogoutHelper.loginSA(userName, "netwitness");
-            }
-            catch (Exception e) {
-                e.printStackTrace();
-            }
+        UserSession session = ApplicationConstant.sessionIdMapByApplicationUser.get(userName);
+        if(session != null) {
+            jSessionId = session.getSaSessionId();
         }
+        log.info("returning jSession id for user:"+userName+" as :"+jSessionId);
         return jSessionId;
     }
+
+
 }

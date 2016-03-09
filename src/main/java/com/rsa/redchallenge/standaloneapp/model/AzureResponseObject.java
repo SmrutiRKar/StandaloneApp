@@ -8,52 +8,25 @@ import java.sql.Timestamp;
  */
 public class AzureResponseObject {
 
-    private String id;
-    private Date createdAt;
-    private Date updatedAt;
-    private Timestamp version;
-    private boolean deleted;
+    private String message;
+    private boolean success;
     private String jsonResponse;
     private String mobileId;
 
-    public String getId() {
-        return id;
+    public String getMessage() {
+        return message;
     }
 
-    public void setId(String id) {
-        this.id = id;
+    public void setMessage(String message) {
+        this.message = message;
     }
 
-    public Date getCreatedAt() {
-        return createdAt;
+    public boolean isSuccess() {
+        return success;
     }
 
-    public void setCreatedAt(Date createdAt) {
-        this.createdAt = createdAt;
-    }
-
-    public Date getUpdatedAt() {
-        return updatedAt;
-    }
-
-    public void setUpdatedAt(Date updatedAt) {
-        this.updatedAt = updatedAt;
-    }
-
-    public Timestamp getVersion() {
-        return version;
-    }
-
-    public void setVersion(Timestamp version) {
-        this.version = version;
-    }
-
-    public boolean isDeleted() {
-        return deleted;
-    }
-
-    public void setDeleted(boolean deleted) {
-        this.deleted = deleted;
+    public void setSuccess(boolean success) {
+        this.success = success;
     }
 
     public String getJsonResponse() {
@@ -74,12 +47,9 @@ public class AzureResponseObject {
 
     @Override
     public String toString() {
-        return "AzureReponseObject{" +
-                "id='" + id + '\'' +
-                ", createdAt=" + createdAt +
-                ", updatedAt=" + updatedAt +
-                ", version=" + version +
-                ", deleted=" + deleted +
+        return "AzureResponseObject{" +
+                "message='" + message + '\'' +
+                ", success=" + success +
                 ", jsonResponse='" + jsonResponse + '\'' +
                 ", mobileId='" + mobileId + '\'' +
                 '}';
