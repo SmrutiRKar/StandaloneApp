@@ -45,7 +45,7 @@ public class ParseRequestFactory {
             sessionId =  getSessionId(azureRequestObject.getRequestUser(),"SA");
            if(StringUtils.isEmpty(sessionId) && !azureRequestObject.getRequestOperation().equals("loginCheck")){
                // User session not present!! This should not happen!
-               responseForQueue = "";
+               responseForQueue = " ";
                errorMessage = "Please Login again!";
            } else {
                if (azureRequestObject.getRequestOperation().equals("dashboardJson")) {
@@ -59,6 +59,28 @@ public class ParseRequestFactory {
                } else if (azureRequestObject.getRequestOperation().equals("loginCheck")) {
                    responseForQueue = SecurityParser.performLoginCheck(azureRequestObject.getRequestPayload());
                }
+               else if (azureRequestObject.getRequestOperation().equals("LiveConnectDashboard")) {
+                   responseForQueue = liveConnectorParser.getLiveConnectDashboard(sessionId,azureRequestObject.getRequestUser());
+               }
+               else if (azureRequestObject.getRequestOperation().equals("LiveIncidentSyncNow")) {
+                   responseForQueue = liveConnectorParser.scheduleLiveIncidents("0",sessionId,azureRequestObject.getRequestUser());
+               }
+               else if (azureRequestObject.getRequestOperation().equals("LiveIncidentSchedule")) {
+                   responseForQueue = liveConnectorParser.scheduleLiveIncidents(azureRequestObject.getRequestParams(),sessionId,azureRequestObject.getRequestUser());
+               }
+               else if (azureRequestObject.getRequestOperation().equals("LiveInvestigationSyncNow")) {
+                   responseForQueue = liveConnectorParser.scheduleLiveInvestigation("0",sessionId,azureRequestObject.getRequestUser());
+               }
+               else if (azureRequestObject.getRequestOperation().equals("LiveInvestigationSchedule")) {
+                   responseForQueue = liveConnectorParser.scheduleLiveInvestigation(azureRequestObject.getRequestParams(),sessionId,azureRequestObject.getRequestUser());
+               }
+               else if (azureRequestObject.getRequestOperation().equals("LiveIncidentDDown")) {
+                   responseForQueue = liveConnectorParser.getLiveIncidentsDDown(azureRequestObject.getRequestParams(),sessionId,azureRequestObject.getRequestUser());
+               }
+               else if (azureRequestObject.getRequestOperation().equals("LiveInvestigationDDown")) {
+                   responseForQueue = liveConnectorParser.getLiveInvestigationDDown(azureRequestObject.getRequestParams(),sessionId,azureRequestObject.getRequestUser());
+               }
+
                success =  true;
            }
             //Push data to queue
