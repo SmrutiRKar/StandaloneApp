@@ -21,6 +21,7 @@ public class ApplicationConstant {
     public static String AZURE_NOTIFICATION_QUEUE = "notificationqueue";
     public static String AZURE_SHARED_POLICY_NAME = "RootManageSharedAccessKey";
     public static String AZURE_KEY = "RtI+FcVtOsbQQv8uCfvJHyXzzMgUb1USHRENbwTD2e8=";
+    public static String ARCHER_BASE_URL= "http://10.31.44.160/RSAarcher";
 
     // Declare all the URL's here
 

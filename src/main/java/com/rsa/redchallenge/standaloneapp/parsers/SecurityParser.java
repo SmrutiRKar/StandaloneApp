@@ -40,6 +40,15 @@ public class SecurityParser {
 
         } else if(((String)payloadmap.get("loginType")).equalsIgnoreCase("ARCHER")){
             //perform login check for ARCHER
+            ObjectMapper mapper = new ObjectMapper();
+            try {
+                UserSession tempSession = mapper.readValue(payload,UserSession.class);
+                log.info("performing login check for payload obj.."+tempSession);
+                return checkLoginFromApplications(tempSession);
+            }catch(Exception e){
+                log.error("Failed to performLogin:"+e,e);
+                return mapper.writeValueAsString(new UserSession());
+            }
         } else if (((String)payloadmap.get("loginType")).equalsIgnoreCase("SSO") ){
             //perform login check for SSO
         } else {
@@ -60,11 +69,12 @@ public class SecurityParser {
     }
 
     public static void performReLoginAndUpdateJsessionId(UserSession session) throws Exception{
+        RestInteractor restInteractor =  new RestInteractor();
+        String res = "";
         switch(session.getLoginType()){
             case "SA":
                 String jsessId =  LoginLogoutHelper.loginSA(session.getSaUsername(),session.getSaPassword());
-                RestInteractor restInteractor =  new RestInteractor();
-                String res =  restInteractor.performGet(String.class, ApplicationConstant.SA_BASE_URL + ApplicationConstant.SA_TEST_LOGIN,null,jsessId);
+                res =  restInteractor.performGet(String.class, ApplicationConstant.SA_BASE_URL + ApplicationConstant.SA_TEST_LOGIN,null,jsessId);
                 if(res.equalsIgnoreCase("true"))  {
                     log.info("performing login check for sa successfull..");
                     //valid credentials... save the session id and credentials
@@ -95,6 +105,36 @@ public class SecurityParser {
                 }
 
             case "ARCHER" :
+                String archerJsessId =  LoginLogoutHelper.loginArcher(session.getArcherUsername(), session.getArcherPassword(), session.getArcherInstance());
+                if(archerJsessId!=null && !archerJsessId.isEmpty()) {
+                    log.info("performing login check for Archer successfull..");
+                    //valid credentials... save the session id and credentials
+                    UserSession oldSession = ApplicationConstant.sessionIdMapByApplicationUser.get(session.getSaUsername());
+                    if(oldSession == null) {
+                        UserSession uSession = new UserSession();
+                        uSession.setArcherUsername(session.getArcherUsername());
+                        uSession.setArcherPassword(session.getArcherPassword());
+                        uSession.setArcherInstance(session.getArcherInstance());
+                        uSession.setArcherSessionId(archerJsessId);
+                        uSession.setArcherLoginDate(new Date());
+                        uSession.setLoginType("Archer");
+                        log.info("setting new Session object for user.."+uSession);
+                        ApplicationConstant.sessionIdMapByApplicationUser.put(session.getSaUsername(), uSession);
+                    } else {
+                        //update sa credentials
+                        //oldSession.setArcherPassword(session.getArcherPassword());
+                        oldSession.setArcherPassword(session.getArcherPassword());
+                        oldSession.setArcherSessionId(archerJsessId);
+                        if(oldSession.getLoginType().equalsIgnoreCase("SA") || oldSession.getLoginType().equalsIgnoreCase("SSO")){
+                            oldSession.setLoginType("BOTH");
+                        } else {
+                            oldSession.setLoginType("Archer");
+                        }
+                        log.info("updated existing session object :"+oldSession);
+                    }
+                } else {
+                    throw new Exception("Invalid credentials");
+                }
                 break;
             case "SSO":
                 break;
