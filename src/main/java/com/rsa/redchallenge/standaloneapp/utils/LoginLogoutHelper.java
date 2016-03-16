@@ -24,6 +24,14 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestTemplate;
 
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.nio.file.AccessDeniedException;
 import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
@@ -32,6 +40,7 @@ import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.LinkedList;
 import java.util.List;
+import org.apache.commons.io.IOUtils;
 
 
 /**
@@ -112,6 +121,54 @@ public class LoginLogoutHelper {
     private static void setFactory(RestTemplate restTemplate) {
         //if (configuration.getActivationServerPath().contains("https://"))
             restTemplate.setRequestFactory(new HttpComponentsClientHttpRequestFactory(getHttpClient()));
+    }
+
+    public static String loginArcher(String username, String password, String instance) throws AccessDeniedException {
+        String sessionId = null;
+        String soapAction = "http://archer-tech.com/webservices/CreateUserSessionFromInstance";
+        String soapBody = "<soap:Envelope xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">    "
+                + "<soap:Body>      <CreateUserSessionFromInstance xmlns=\"http://archer-tech.com/webservices/\">        "
+                + "<userName>" +username+ "</userName>" + "<instanceName>" + instance+ "</instanceName>"
+                + "<password>" +password+ "</password>"
+                + "</CreateUserSessionFromInstance>    </soap:Body>  </soap:Envelope>";
+
+        String url = ApplicationConstant.ARCHER_BASE_URL + "/ws/general.asmx", error = null;
+        try {
+            URL obj = new URL(url);
+            HttpURLConnection con = (HttpURLConnection) obj.openConnection();
+
+            // add reuqest header
+            con.setRequestMethod("POST");
+            con.setRequestProperty("content-type", "text/xml; charset=utf-8");
+            con.setRequestProperty("SOAPAction", soapAction);
+
+            // Send post request
+            con.setDoOutput(true);
+            OutputStream out = con.getOutputStream();
+            Writer wout = new OutputStreamWriter(out);
+            out.write(soapBody.getBytes());
+            wout.flush();
+            wout.close();
+
+            if (con.getResponseCode() == 200) {
+                sessionId = IOUtils.toString(con.getInputStream(), "UTF-8");
+                String beginString = "<CreateUserSessionFromInstanceResult>";
+                String endString = "</CreateUserSessionFromInstanceResult>";
+                sessionId = sessionId.substring(sessionId.indexOf(beginString) + beginString.length(),
+                        sessionId.indexOf(endString));
+            } else {
+             //   error = parseError(IOUtils.toString(con.getErrorStream(), "UTF-8"));
+                throw new AccessDeniedException("Unable to login with specified credentials");
+            }
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        }catch (AccessDeniedException accessDeniedException) {
+            throw new AccessDeniedException("Unable to login with specified credentials");
+        }catch (IOException ioException) {
+            ioException.printStackTrace();
+        }
+        return sessionId;
+
     }
 
     private static  DefaultHttpClient getHttpClient() {

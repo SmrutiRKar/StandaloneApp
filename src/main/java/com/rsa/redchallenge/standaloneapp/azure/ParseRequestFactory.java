@@ -3,6 +3,7 @@ package com.rsa.redchallenge.standaloneapp.azure;
 import com.rsa.redchallenge.standaloneapp.constants.ApplicationConstant;
 import com.rsa.redchallenge.standaloneapp.model.AzureRequestObject;
 import com.rsa.redchallenge.standaloneapp.model.UserSession;
+import com.rsa.redchallenge.standaloneapp.parsers.ArcherParser;
 import com.rsa.redchallenge.standaloneapp.parsers.IncidentParser;
 import com.rsa.redchallenge.standaloneapp.parsers.LiveConnectorParser;
 import com.rsa.redchallenge.standaloneapp.parsers.SecurityParser;
@@ -32,6 +33,8 @@ public class ParseRequestFactory {
     @Autowired
     private IncidentParser incidentParser;
     @Autowired
+    private ArcherParser archerParser;
+    @Autowired
     private LiveConnectorParser liveConnectorParser;
 
 
@@ -58,6 +61,8 @@ public class ParseRequestFactory {
                    responseForQueue = incidentParser.modifyIncident(azureRequestObject.getRequestPayload(), sessionId,azureRequestObject.getRequestUser());
                } else if (azureRequestObject.getRequestOperation().equals("loginCheck")) {
                    responseForQueue = SecurityParser.performLoginCheck(azureRequestObject.getRequestPayload());
+               }else if (azureRequestObject.getRequestOperation().equals("archerDashboardJson")) {
+                   responseForQueue = archerParser.getDashboardReports(sessionId,azureRequestObject.getRequestUser());
                }
                success =  true;
            }
