@@ -15,13 +15,13 @@ public class OpenRisk {
         this.projectName = projectName;
     }
 
-    public long getBusinessRiskScore() {
+    public Float getBusinessRiskScore() {
         return businessRiskScore;
     }
 
-    public void setBusinessRiskScore(long businessRiskScore) {
+    public void setBusinessRiskScore(Float businessRiskScore) {
         this.businessRiskScore = businessRiskScore;
     }
 
-    Long businessRiskScore;
+    Float businessRiskScore;
 }

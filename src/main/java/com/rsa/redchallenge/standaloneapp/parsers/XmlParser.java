@@ -1,6 +1,7 @@
 package com.rsa.redchallenge.standaloneapp.parsers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.rsa.redchallenge.standaloneapp.model.Archer.LossImpact;
 import com.rsa.redchallenge.standaloneapp.model.Archer.OpenRisk;
 import com.rsa.redchallenge.standaloneapp.model.Archer.RequestType;
 import com.sun.org.apache.xerces.internal.dom.DeferredElementNSImpl;
@@ -14,16 +15,20 @@ import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 import java.io.*;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 /**
  * Created by vishwk on 3/15/2016.
  */
 public class XmlParser {
 
+    static List<OpenRisk> openRisks = new LinkedList<OpenRisk>();
+    static List<LossImpact> losses = new LinkedList<LossImpact>();
 
-    public static String getxpathDetails(String xpathExpression,String result,RequestType requestType) throws XPathExpressionException {
+    /*List<OpenRisk> complianceList = new LinkedList<>();
+    List<OpenRisk> threats = new LinkedList<>();
+    */
+    public static String getxpathDetails(String xpathExpression, String result, RequestType requestType) throws XPathExpressionException {
         ObjectMapper mapper = new ObjectMapper();
         InputStream is = new ByteArrayInputStream(result.getBytes());
         XPath xpath = XPathFactory.newInstance().newXPath();
@@ -40,24 +45,48 @@ public class XmlParser {
                         + node.getNodeName());
                 if (((DeferredElementNSImpl) node).getTagName().equals("Record")) {
                     Element record = (Element) node;
-                    OpenRisk openRisk = new OpenRisk();
-                    openRisk.setProjectName(record.getChildNodes().item(1).getTextContent());
-                    openRisk.setBusinessRiskScore(200+j*20);
-                    openRisks.add(openRisk);
+                    convertNodeToOject(record, requestType);
                 }
             }
         }
 
         //   openRisks = mapper.readValue(jsonInput, mapper.getTypeFactory().constructCollectionType(List.class, MyClass.class));
-        return writeListToJsonArray(openRisks);
+        return writeListToJsonArray();
     }
 
-    private static String writeListToJsonArray(List<OpenRisk> openRisks){
+    private static void convertNodeToOject(Element record, RequestType requestType) {
+        switch (requestType) {
+            case RISKREQUEST:
+                OpenRisk openRisk = new OpenRisk();
+                openRisk.setProjectName(record.getChildNodes().item(0).getTextContent());
+                String score = record.getChildNodes().item(1).getTextContent();
+                if(score!=null && !score.isEmpty())
+                    openRisk.setBusinessRiskScore(Float.valueOf(record.getChildNodes().item(1).getTextContent()));
+                else
+                    openRisk.setBusinessRiskScore(0F);
+                openRisks.add(openRisk);
+                break;
+            case LOSSREQUEST:
+                LossImpact lossImpact = new LossImpact();
+                lossImpact.setBusinessUnit(record.getChildNodes().item(0).getTextContent());
+                String amount = record.getChildNodes().item(1).getTextContent();
+                if(amount!=null && !amount.isEmpty())
+                    lossImpact.setLossAmountInDollars(Long.valueOf(record.getChildNodes().item(1).getTextContent()));
+                else
+                    lossImpact.setLossAmountInDollars(0L);
+                losses.add(lossImpact);
+                break;
+        }
+    }
+
+    private static String writeListToJsonArray() {
         final OutputStream out = new ByteArrayOutputStream();
         final ObjectMapper mapper = new ObjectMapper();
-
+        Map<String,Object> resultMap = new HashMap<String,Object>();
+        resultMap.put("OpenRisks",openRisks);
+        resultMap.put("Losses",losses);
         try {
-            mapper.writeValue(out, openRisks);
+            mapper.writeValue(out, resultMap);
         } catch (IOException e) {
             e.printStackTrace();
         }

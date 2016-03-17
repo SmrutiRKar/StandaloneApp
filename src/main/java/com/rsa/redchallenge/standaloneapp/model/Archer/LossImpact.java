@@ -4,25 +4,26 @@ package com.rsa.redchallenge.standaloneapp.model.Archer;
  * Created by vishwk on 3/4/2016.
  */
 public class LossImpact {
-    String lossEventName;
+    public String getBusinessUnit() {
+        return businessUnit;
+    }
 
-    String lossAmountInDollars;
+    public void setBusinessUnit(String businessUnit) {
+        this.businessUnit = businessUnit;
+    }
 
-    public String getLossAmountInDollars() {
+    String businessUnit;
+
+    Long lossAmountInDollars;
+
+    public Long getLossAmountInDollars() {
         return lossAmountInDollars;
     }
 
-    public void setLossAmountInDollars(String lossAmountInDollars) {
+    public void setLossAmountInDollars(Long lossAmountInDollars) {
         this.lossAmountInDollars = lossAmountInDollars;
     }
 
-    public String getLossEventName() {
-        return lossEventName;
-    }
-
-    public void setLossEventName(String lossEventName) {
-        this.lossEventName = lossEventName;
-    }
 
 
 }
