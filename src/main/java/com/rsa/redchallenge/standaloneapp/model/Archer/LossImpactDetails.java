@@ -5,35 +5,34 @@ package com.rsa.redchallenge.standaloneapp.model.Archer;
  */
 public class LossImpactDetails {
 
-    String lossDescription;
-
-    String dateOfOccurrence;
-
-    String overAllStatus;
-
-    public String getDateOfOccurrence() {
-        return dateOfOccurrence;
+    public String getBusinessUnit() {
+        return businessUnit;
     }
 
-    public void setDateOfOccurrence(String dateOfOccurrence) {
-        this.dateOfOccurrence = dateOfOccurrence;
+    public void setBusinessUnit(String businessUnit) {
+        this.businessUnit = businessUnit;
     }
 
-    public String getLossDescription() {
-        return lossDescription;
+    public String getBusinessUnitManager() {
+        return businessUnitManager;
     }
 
-    public void setLossDescription(String lossDescription) {
-        this.lossDescription = lossDescription;
+    public void setBusinessUnitManager(String businessUnitManager) {
+        this.businessUnitManager = businessUnitManager;
     }
 
-    public String getOverAllStatus() {
-        return overAllStatus;
+    public String getReviewTaskDescription() {
+        return reviewTaskDescription;
     }
 
-    public void setOverAllStatus(String overAllStatus) {
-        this.overAllStatus = overAllStatus;
+    public void setReviewTaskDescription(String reviewTaskDescription) {
+        this.reviewTaskDescription = reviewTaskDescription;
     }
 
+    String businessUnit;
+
+    String businessUnitManager;
+
+    String reviewTaskDescription;
 
 }

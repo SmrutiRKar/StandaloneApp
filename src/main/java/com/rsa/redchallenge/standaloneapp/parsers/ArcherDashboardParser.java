@@ -1,11 +1,8 @@
 package com.rsa.redchallenge.standaloneapp.parsers;
 
 
-import com.rsa.redchallenge.standaloneapp.constants.ApplicationConstant;
-
 import com.rsa.redchallenge.standaloneapp.model.Archer.RequestType;
 
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -14,28 +11,22 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-import java.io.*;
-import java.net.HttpURLConnection;
-import java.net.URL;
-
 /**
  * Created by kars2 on 3/4/16.
  */
 
 @Component
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-public class ArcherParser {
+public class ArcherDashboardParser {
 
-    private static final Log log = LogFactory.getLog(ArcherParser.class);
+    private static final Log log = LogFactory.getLog(ArcherDashboardParser.class);
 
     @Autowired
-    RequestType requestType;
+    ArcherRequestParser requestParser;
 
     @Autowired
     public static XmlParser xmlParser;
 
-    public static String soapDevicesAction = "http://archer-tech.com/webservices/ExecuteSearch";
-   // public static String result;
     public static String riskRequest = "<soap:Envelope xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\"><soap:Body><ExecuteSearch xmlns=\"http://archer-tech.com/webservices/\"> "
             + "<sessionToken></sessionToken>" + "<searchOptions>"
             // +
@@ -65,65 +56,17 @@ public class ArcherParser {
             + "</searchOptions>"
             + "<pageNumber>1</pageNumber>	    </ExecuteSearch>	  </soap:Body>	</soap:Envelope>";
 
-    static String devicexpathArray = new String("/Records");
 
     public String getDashboardReports(String sessionId, String user) throws Exception {
-        String lossResult =  getResponse(lossRequest, sessionId,requestType.LOSSREQUEST);
-       // getDevicesContext(complianceRequest, sessionId);
-      //  getDevicesContext(riskRequest, sessionId);
-        String riskResult = getResponse(riskRequest, sessionId,requestType.RISKREQUEST);
-        return lossResult + riskResult;
+        String riskResult = requestParser.getResponse(riskRequest, sessionId, RequestType.RISKREQUEST);
+        xmlParser.getxpathDetails(riskResult, RequestType.RISKREQUEST);
+        String lossResult =  requestParser.getResponse(lossRequest, sessionId, RequestType.LOSSREQUEST);
+        xmlParser.getxpathDetails(lossResult, RequestType.LOSSREQUEST);
+        String complianceResult =  requestParser.getResponse(complianceRequest, sessionId, RequestType.COMPLIANCEREQUEST);
+        xmlParser.getxpathDetails(complianceResult, RequestType.COMPLIANCEREQUEST);
+        String threatResult =  requestParser.getResponse(threatRequest, sessionId, RequestType.THREATREQUEST);
+        xmlParser.getxpathDetails(threatResult,  RequestType.THREATREQUEST);
+        return xmlParser.writeListToJsonArray(RequestType.ALLDASHBOARD);
     }
-
-    public static String getResponse(String request, String sessionId,RequestType requestType) throws Exception {
-
-        String result = "";
-        String url = ApplicationConstant.ARCHER_BASE_URL + "/ws/search.asmx", error = null;
-        URL obj = new URL(url);
-        HttpURLConnection con = (HttpURLConnection) obj.openConnection();
-
-        // add request header
-        con.setRequestMethod("POST");
-        con.setRequestProperty("content-type", "text/xml; charset=utf-8");
-        con.setRequestProperty("SOAPAction", soapDevicesAction);
-
-        String newRequest = request.replaceAll("<sessionToken></sessionToken>",
-                "<sessionToken>" + sessionId + "</sessionToken>");
-
-        con.setDoOutput(true);
-        OutputStream out = con.getOutputStream();
-        Writer wout = new OutputStreamWriter(out);
-        out.write(newRequest.getBytes());
-        wout.flush();
-        wout.close();
-
-        if (con.getResponseCode() == 200) {
-            result = IOUtils.toString(con.getInputStream(), "UTF-8");
-            System.out.println(result);
-        } else {
-            error = IOUtils.toString(con.getErrorStream(), "UTF-8");
-            System.out.println("\nArcher Response Error: " + error);
-        }
-        if (error == null) {
-            result = result.replaceAll("&gt;", ">");
-            result = result.replaceAll("&lt;", "<");
-            result = result.substring(result.indexOf("<Records"),
-                    result.indexOf("</Records>") + 10);
-
-            return xmlParser.getxpathDetails(devicexpathArray, result, requestType);
-
-        } else
-            System.out.println("\nArcher Response Error: " + error);
-        return null;
-    }
-
-
-
-    public boolean checkIfJsessionIdExpired(String result,String user) throws  Exception{
-       return true;
-    }
-
-
-
 
 }

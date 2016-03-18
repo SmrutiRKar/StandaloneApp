@@ -3,26 +3,15 @@ package com.rsa.redchallenge.standaloneapp.azure;
 import com.rsa.redchallenge.standaloneapp.constants.ApplicationConstant;
 import com.rsa.redchallenge.standaloneapp.model.AzureRequestObject;
 import com.rsa.redchallenge.standaloneapp.model.UserSession;
-import com.rsa.redchallenge.standaloneapp.parsers.ArcherParser;
-import com.rsa.redchallenge.standaloneapp.parsers.IncidentParser;
-import com.rsa.redchallenge.standaloneapp.parsers.LiveConnectorParser;
-import com.rsa.redchallenge.standaloneapp.parsers.SecurityParser;
-import com.rsa.redchallenge.standaloneapp.utils.AzureUtils;
-import com.rsa.redchallenge.standaloneapp.utils.LoginLogoutHelper;
-import com.rsa.redchallenge.standaloneapp.utils.RestInteractor;
+import com.rsa.redchallenge.standaloneapp.parsers.*;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.tomcat.jni.User;
-import org.codehaus.jackson.map.ObjectMapper;
-import org.codehaus.jettison.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
 import java.util.Calendar;
 import java.util.Date;
-import java.util.Map;
 
 /**
  * Created by kars2 on 2/29/16.
@@ -33,9 +22,11 @@ public class ParseRequestFactory {
     @Autowired
     private IncidentParser incidentParser;
     @Autowired
-    private ArcherParser archerParser;
+    private ArcherDashboardParser archerDashboardParser;
     @Autowired
     private LiveConnectorParser liveConnectorParser;
+    @Autowired
+    ArcherDDownParser archerDDownParser;
 
 
     private static final Log log = LogFactory.getLog(ParseRequestFactory.class);
@@ -62,7 +53,7 @@ public class ParseRequestFactory {
                } else if (azureRequestObject.getRequestOperation().equals("loginCheck")) {
                    responseForQueue = SecurityParser.performLoginCheck(azureRequestObject.getRequestPayload());
                }else if (azureRequestObject.getRequestOperation().equals("archerDashboardJson")) {
-                   responseForQueue = archerParser.getDashboardReports(sessionId,azureRequestObject.getRequestUser());
+                   responseForQueue = archerDashboardParser.getDashboardReports(sessionId,azureRequestObject.getRequestUser());
                }
                else if (azureRequestObject.getRequestOperation().equals("LiveConnectDashboard")) {
                    responseForQueue = liveConnectorParser.getLiveConnectDashboard(sessionId,azureRequestObject.getRequestUser());
@@ -84,6 +75,21 @@ public class ParseRequestFactory {
                }
                else if (azureRequestObject.getRequestOperation().equals("LiveInvestigationDDown")) {
                    responseForQueue = liveConnectorParser.getLiveInvestigationDDown(azureRequestObject.getRequestParams(),sessionId,azureRequestObject.getRequestUser());
+               }
+               else if (azureRequestObject.getRequestOperation().equals("riskDDown")) {
+                   responseForQueue = archerDDownParser.getRiskDDown(azureRequestObject.getRequestParams(), sessionId, azureRequestObject.getRequestUser());
+               }
+               else if (azureRequestObject.getRequestOperation().equals("lossDDown")) {
+                   responseForQueue = archerDDownParser.getLossDDown(azureRequestObject.getRequestParams(), sessionId, azureRequestObject.getRequestUser());
+               }
+               else if (azureRequestObject.getRequestOperation().equals("riskDDown")) {
+                   responseForQueue = archerDDownParser.getLossDDown(azureRequestObject.getRequestParams(), sessionId, azureRequestObject.getRequestUser());
+               }
+               else if (azureRequestObject.getRequestOperation().equals("complianceDDown")) {
+                   responseForQueue = archerDDownParser.getLossDDown(azureRequestObject.getRequestParams(), sessionId, azureRequestObject.getRequestUser());
+               }
+               else if (azureRequestObject.getRequestOperation().equals("threatDDown")) {
+                   responseForQueue = archerDDownParser.getLossDDown(azureRequestObject.getRequestParams(), sessionId, azureRequestObject.getRequestUser());
                }
 
                success =  true;
