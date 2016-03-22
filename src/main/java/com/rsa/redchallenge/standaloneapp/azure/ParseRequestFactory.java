@@ -25,71 +25,71 @@ public class ParseRequestFactory {
     private ArcherDashboardParser archerDashboardParser;
     @Autowired
     private LiveConnectorParser liveConnectorParser;
-    @Autowired
-    ArcherDDownParser archerDDownParser;
 
 
     private static final Log log = LogFactory.getLog(ParseRequestFactory.class);
 
     public void parse(AzureRequestObject azureRequestObject) {
-        String responseForQueue = "", sessionId = null;
+        String responseForQueue = " ", saSessionId = null,archerSessId = null;
         boolean success =  false;
-        String errorMessage = "";
+        String errorMessage = " ";
         try {
-            sessionId =  getSessionId(azureRequestObject.getRequestUser(),"SA");
-           if(StringUtils.isEmpty(sessionId) && !azureRequestObject.getRequestOperation().equals("loginCheck")){
+            saSessionId =  getSessionId(azureRequestObject.getRequestUser(),"SA");
+            archerSessId = getSessionId(azureRequestObject.getRequestUser(),"ARCHER");
+
+           if(( StringUtils.isEmpty(saSessionId) && StringUtils.isEmpty(archerSessId) ) && !azureRequestObject.getRequestOperation().equals("loginCheck")){
                // User session not present!! This should not happen!
                responseForQueue = " ";
                errorMessage = "Please Login again!";
            } else {
                if (azureRequestObject.getRequestOperation().equals("dashboardJson")) {
-                   responseForQueue = incidentParser.getJsonIncidents(sessionId,azureRequestObject.getRequestUser());
+                   responseForQueue = incidentParser.getJsonIncidents(saSessionId,azureRequestObject.getRequestUser());
                } else if (azureRequestObject.getRequestOperation().equals("incidentSumary")) {
-                   responseForQueue = incidentParser.getIncidentSummary(azureRequestObject.getRequestParams(), sessionId,azureRequestObject.getRequestUser());
+                   responseForQueue = incidentParser.getIncidentSummary(azureRequestObject.getRequestParams(), saSessionId,azureRequestObject.getRequestUser());
                } else if (azureRequestObject.getRequestOperation().equals("individualIncident")) {
-                   responseForQueue = incidentParser.getIncidentById(azureRequestObject.getRequestParams(), sessionId,azureRequestObject.getRequestUser());
+                   responseForQueue = incidentParser.getIncidentById(azureRequestObject.getRequestParams(), saSessionId,azureRequestObject.getRequestUser());
                } else if (azureRequestObject.getRequestOperation().equals("modifyIncident")) {
-                   responseForQueue = incidentParser.modifyIncident(azureRequestObject.getRequestPayload(), sessionId,azureRequestObject.getRequestUser());
+                   responseForQueue = incidentParser.modifyIncident(azureRequestObject.getRequestPayload(), saSessionId,azureRequestObject.getRequestUser());
                } else if (azureRequestObject.getRequestOperation().equals("loginCheck")) {
                    responseForQueue = SecurityParser.performLoginCheck(azureRequestObject.getRequestPayload());
-               }else if (azureRequestObject.getRequestOperation().equals("archerDashboardJson")) {
-                   responseForQueue = archerDashboardParser.getDashboardReports(sessionId,azureRequestObject.getRequestUser());
+               }  else if (azureRequestObject.getRequestOperation().equals("mainDashboard")) {
+                   responseForQueue = archerDashboardParser.getDashboardReports(archerSessId,saSessionId,azureRequestObject.getRequestUser());
+               }
+               else if (azureRequestObject.getRequestOperation().equals("archerDashboardJson")) {
+                   responseForQueue = archerDashboardParser.getArcherDashboardReports(archerSessId,azureRequestObject.getRequestUser());
                }
                else if (azureRequestObject.getRequestOperation().equals("LiveConnectDashboard")) {
-                   responseForQueue = liveConnectorParser.getLiveConnectDashboard(sessionId,azureRequestObject.getRequestUser());
+                   responseForQueue = liveConnectorParser.getLiveConnectDashboard(saSessionId,azureRequestObject.getRequestUser());
                }
                else if (azureRequestObject.getRequestOperation().equals("LiveIncidentSyncNow")) {
-                   responseForQueue = liveConnectorParser.scheduleLiveIncidents("0",sessionId,azureRequestObject.getRequestUser());
+                   responseForQueue = liveConnectorParser.scheduleLiveIncidents("0",saSessionId,azureRequestObject.getRequestUser());
                }
                else if (azureRequestObject.getRequestOperation().equals("LiveIncidentSchedule")) {
-                   responseForQueue = liveConnectorParser.scheduleLiveIncidents(azureRequestObject.getRequestParams(),sessionId,azureRequestObject.getRequestUser());
+                   responseForQueue = liveConnectorParser.scheduleLiveIncidents(azureRequestObject.getRequestParams(),saSessionId,azureRequestObject.getRequestUser());
                }
                else if (azureRequestObject.getRequestOperation().equals("LiveInvestigationSyncNow")) {
-                   responseForQueue = liveConnectorParser.scheduleLiveInvestigation("0",sessionId,azureRequestObject.getRequestUser());
+                   responseForQueue = liveConnectorParser.scheduleLiveInvestigation("0",saSessionId,azureRequestObject.getRequestUser());
                }
                else if (azureRequestObject.getRequestOperation().equals("LiveInvestigationSchedule")) {
-                   responseForQueue = liveConnectorParser.scheduleLiveInvestigation(azureRequestObject.getRequestParams(),sessionId,azureRequestObject.getRequestUser());
+                   responseForQueue = liveConnectorParser.scheduleLiveInvestigation(azureRequestObject.getRequestParams(),saSessionId,azureRequestObject.getRequestUser());
                }
                else if (azureRequestObject.getRequestOperation().equals("LiveIncidentDDown")) {
-                   responseForQueue = liveConnectorParser.getLiveIncidentsDDown(azureRequestObject.getRequestParams(),sessionId,azureRequestObject.getRequestUser());
+                   responseForQueue = liveConnectorParser.getLiveIncidentsDDown(azureRequestObject.getRequestParams(),saSessionId,azureRequestObject.getRequestUser());
                }
                else if (azureRequestObject.getRequestOperation().equals("LiveInvestigationDDown")) {
-                   responseForQueue = liveConnectorParser.getLiveInvestigationDDown(azureRequestObject.getRequestParams(),sessionId,azureRequestObject.getRequestUser());
+                   responseForQueue = liveConnectorParser.getLiveInvestigationDDown(azureRequestObject.getRequestParams(),saSessionId,azureRequestObject.getRequestUser());
                }
-               else if (azureRequestObject.getRequestOperation().equals("riskDDown")) {
-                   responseForQueue = archerDDownParser.getRiskDDown(azureRequestObject.getRequestParams(), sessionId, azureRequestObject.getRequestUser());
+               else if (azureRequestObject.getRequestOperation().equals("RiskDDown")) {
+                   responseForQueue = ArcherDDownParser.getRiskDDown(azureRequestObject.getRequestParams(), archerSessId, azureRequestObject.getRequestUser());
                }
-               else if (azureRequestObject.getRequestOperation().equals("lossDDown")) {
-                   responseForQueue = archerDDownParser.getLossDDown(azureRequestObject.getRequestParams(), sessionId, azureRequestObject.getRequestUser());
+               else if (azureRequestObject.getRequestOperation().equals("LossDDown")) {
+                   responseForQueue = ArcherDDownParser.getLossDDown(azureRequestObject.getRequestParams(), archerSessId, azureRequestObject.getRequestUser());
                }
-               else if (azureRequestObject.getRequestOperation().equals("riskDDown")) {
-                   responseForQueue = archerDDownParser.getLossDDown(azureRequestObject.getRequestParams(), sessionId, azureRequestObject.getRequestUser());
+               else if (azureRequestObject.getRequestOperation().equals("ComplianceDDown")) {
+                   responseForQueue = ArcherDDownParser.getComplianceDDown(azureRequestObject.getRequestParams(), archerSessId, azureRequestObject.getRequestUser());
                }
-               else if (azureRequestObject.getRequestOperation().equals("complianceDDown")) {
-                   responseForQueue = archerDDownParser.getLossDDown(azureRequestObject.getRequestParams(), sessionId, azureRequestObject.getRequestUser());
-               }
-               else if (azureRequestObject.getRequestOperation().equals("threatDDown")) {
-                   responseForQueue = archerDDownParser.getLossDDown(azureRequestObject.getRequestParams(), sessionId, azureRequestObject.getRequestUser());
+               else if (azureRequestObject.getRequestOperation().equals("ThreatDDown")) {
+                   responseForQueue = ArcherDDownParser.getThreatDDown(azureRequestObject.getRequestParams(), archerSessId, azureRequestObject.getRequestUser());
                }
 
                success =  true;
@@ -119,9 +119,13 @@ public class ParseRequestFactory {
         }
         UserSession session = ApplicationConstant.sessionIdMapByApplicationUser.get(userName);
         if(session != null) {
-            jSessionId = session.getSaSessionId();
+            if(applicationName.equals("ARCHER")){
+                jSessionId = session.getArcherSessionId();
+            } else {
+                jSessionId = session.getSaSessionId();
+            }
         }
-        log.info("returning jSession id for user:"+userName+" as :"+jSessionId);
+        log.info("returning jSession id for user:"+userName+" for application:"+applicationName+" as :"+jSessionId);
         return jSessionId;
     }
 

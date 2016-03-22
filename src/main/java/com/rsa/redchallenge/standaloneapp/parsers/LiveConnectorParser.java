@@ -32,6 +32,17 @@ public class LiveConnectorParser {
         return result;
     }
 
+    public String getLiveConnectMainDashboard(String sessionId,String user) throws Exception{
+        String result = "";
+        RestInteractor restInteractor =  new RestInteractor();
+        result =  restInteractor.performGet(String.class, ApplicationConstant.SA_BASE_URL + ApplicationConstant.LIVE_CONNECT_MAIN_DASHBOARD,null,sessionId);
+        if(checkIfJsessionIdExpired(result,user)){
+            result =  restInteractor.performGet(String.class, ApplicationConstant.SA_BASE_URL + ApplicationConstant.LIVE_CONNECT_MAIN_DASHBOARD,null,
+                    ApplicationConstant.sessionIdMapByApplicationUser.get(user).getSaSessionId());
+        }
+        return result;
+    }
+
     public String scheduleLiveInvestigation(String requestParams, String sessionId,String user) throws Exception {
         String result = "";
         RestInteractor restInteractor =  new RestInteractor();

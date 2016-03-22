@@ -11,14 +11,9 @@ import java.util.List;
  */
 public class ArcherDDownParser {
 
-    @Autowired
-    ArcherRequestParser requestParser;
 
-    @Autowired
-    RequestType requestType;
-
-    @Autowired
-    XmlParser xmlParser;
+    static ArcherRequestParser requestParser;
+    static XmlParser xmlParser;
 
     public static String riskDDownRequest = "<soap:Envelope xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\"><soap:Body><ExecuteSearch xmlns=\"http://archer-tech.com/webservices/\"> "
             + "<sessionToken></sessionToken>" + "<searchOptions>"
@@ -49,31 +44,31 @@ public class ArcherDDownParser {
             + "</searchOptions>"
             + "<pageNumber>1</pageNumber>	    </ExecuteSearch>	  </soap:Body>	</soap:Envelope>";
 
-    public String getLossDDown(String requestParams, String sessionId, String requestUser) throws Exception{
-        String lossResult =  requestParser.getResponse(riskDDownRequest, sessionId, requestType.LOSSDRILLDOWNREQUEST);
-        xmlParser.getxpathDetails(lossResult, requestType);
+    public static String getLossDDown(String requestParams, String sessionId, String requestUser) throws Exception{
+        String lossResult =  requestParser.getResponse(riskDDownRequest, sessionId, RequestType.LOSSDRILLDOWNREQUEST);
+        xmlParser.getxpathDetails(lossResult, RequestType.LOSSDRILLDOWNREQUEST);
         xmlParser.findLossDrillDown(requestParams);
-        return XmlParser.writeListToJsonArray(requestType.LOSSDRILLDOWNREQUEST);
+        return XmlParser.writeListToJsonArray(RequestType.LOSSDRILLDOWNREQUEST);
     }
 
-    public String getRiskDDown(String requestParams, String sessionId, String requestUser) throws Exception{
-        String riskResult =  requestParser.getResponse(riskDDownRequest, sessionId, requestType.RISKDRILLDOWNREQUEST);
-        xmlParser.getxpathDetails(riskResult, requestType);
+    public static String getRiskDDown(String requestParams, String sessionId, String requestUser) throws Exception{
+        String riskResult =  requestParser.getResponse(riskDDownRequest, sessionId, RequestType.RISKDRILLDOWNREQUEST);
+        xmlParser.getxpathDetails(riskResult, RequestType.RISKDRILLDOWNREQUEST);
         xmlParser.findRiskDrillDown(requestParams);
-        return XmlParser.writeListToJsonArray(requestType.RISKDRILLDOWNREQUEST);
+        return XmlParser.writeListToJsonArray(RequestType.RISKDRILLDOWNREQUEST);
     }
 
-    public String getComplianceDDown(String requestParams, String sessionId, String requestUser) throws Exception{
-        String complianceResult =  requestParser.getResponse(riskDDownRequest, sessionId, requestType.COMPLIANCEDRILLDOWNREQUEST);
-        xmlParser.getxpathDetails(complianceResult, requestType);
+    public static String getComplianceDDown(String requestParams, String sessionId, String requestUser) throws Exception{
+        String complianceResult =  requestParser.getResponse(riskDDownRequest, sessionId, RequestType.COMPLIANCEDRILLDOWNREQUEST);
+        xmlParser.getxpathDetails(complianceResult, RequestType.COMPLIANCEDRILLDOWNREQUEST);
         xmlParser.findComplianceDrillDown(requestParams);
-        return XmlParser.writeListToJsonArray(requestType.COMPLIANCEDRILLDOWNREQUEST);
+        return XmlParser.writeListToJsonArray(RequestType.COMPLIANCEDRILLDOWNREQUEST);
     }
 
-    public String getThreatDDown(String requestParams, String sessionId, String requestUser) throws Exception{
-        String threatResult =  requestParser.getResponse(riskDDownRequest, sessionId, requestType.THREATDRILLDOWNREQUEST);
-        xmlParser.getxpathDetails(threatResult, requestType);
+    public static String getThreatDDown(String requestParams, String sessionId, String requestUser) throws Exception{
+        String threatResult =  requestParser.getResponse(riskDDownRequest, sessionId, RequestType.THREATDRILLDOWNREQUEST);
+        xmlParser.getxpathDetails(threatResult, RequestType.THREATDRILLDOWNREQUEST);
         xmlParser.findThreatDrillDown(requestParams);
-        return XmlParser.writeListToJsonArray(requestType.THREATDRILLDOWNREQUEST);
+        return XmlParser.writeListToJsonArray(RequestType.THREATDRILLDOWNREQUEST);
     }
 }

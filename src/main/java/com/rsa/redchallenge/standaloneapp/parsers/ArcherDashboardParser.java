@@ -1,6 +1,8 @@
 package com.rsa.redchallenge.standaloneapp.parsers;
 
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.rsa.redchallenge.standaloneapp.model.AllIncidentsDataWrapper;
 import com.rsa.redchallenge.standaloneapp.model.Archer.RequestType;
 
 import org.apache.commons.logging.Log;
@@ -10,6 +12,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
+
+import java.util.Map;
 
 /**
  * Created by kars2 on 3/4/16.
@@ -22,10 +26,7 @@ public class ArcherDashboardParser {
     private static final Log log = LogFactory.getLog(ArcherDashboardParser.class);
 
     @Autowired
-    ArcherRequestParser requestParser;
-
-    @Autowired
-    public static XmlParser xmlParser;
+    private LiveConnectorParser liveConnectorParser;
 
     public static String riskRequest = "<soap:Envelope xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\"><soap:Body><ExecuteSearch xmlns=\"http://archer-tech.com/webservices/\"> "
             + "<sessionToken></sessionToken>" + "<searchOptions>"
@@ -56,17 +57,36 @@ public class ArcherDashboardParser {
             + "</searchOptions>"
             + "<pageNumber>1</pageNumber>	    </ExecuteSearch>	  </soap:Body>	</soap:Envelope>";
 
+    public void populateDashboardData(String sessionId) throws Exception {
+        String riskResult = ArcherRequestParser.getResponse(riskRequest, sessionId, RequestType.RISKREQUEST);
+        XmlParser.getxpathDetails(riskResult, RequestType.RISKREQUEST);
+        String lossResult =  ArcherRequestParser.getResponse(lossRequest, sessionId, RequestType.LOSSREQUEST);
+        XmlParser.getxpathDetails(lossResult, RequestType.LOSSREQUEST);
+        String complianceResult =  ArcherRequestParser.getResponse(complianceRequest, sessionId, RequestType.COMPLIANCEREQUEST);
+        XmlParser.getxpathDetails(complianceResult, RequestType.COMPLIANCEREQUEST);
+        String threatResult =  ArcherRequestParser.getResponse(threatRequest, sessionId, RequestType.THREATREQUEST);
+        XmlParser.getxpathDetails(threatResult,  RequestType.THREATREQUEST);
+    }
 
-    public String getDashboardReports(String sessionId, String user) throws Exception {
-        String riskResult = requestParser.getResponse(riskRequest, sessionId, RequestType.RISKREQUEST);
-        xmlParser.getxpathDetails(riskResult, RequestType.RISKREQUEST);
-        String lossResult =  requestParser.getResponse(lossRequest, sessionId, RequestType.LOSSREQUEST);
-        xmlParser.getxpathDetails(lossResult, RequestType.LOSSREQUEST);
-        String complianceResult =  requestParser.getResponse(complianceRequest, sessionId, RequestType.COMPLIANCEREQUEST);
-        xmlParser.getxpathDetails(complianceResult, RequestType.COMPLIANCEREQUEST);
-        String threatResult =  requestParser.getResponse(threatRequest, sessionId, RequestType.THREATREQUEST);
-        xmlParser.getxpathDetails(threatResult,  RequestType.THREATREQUEST);
-        return xmlParser.writeListToJsonArray(RequestType.ALLDASHBOARD);
+    public String getArcherDashboardReports(String sessionId, String user) throws Exception {
+        populateDashboardData(sessionId);
+        return XmlParser.writeListToJsonArray(RequestType.ALLDASHBOARD);
+    }
+
+    public String getDashboardReports(String archerSessionId,String saSessionId, String user) throws Exception {
+        populateDashboardData(archerSessionId);
+        ObjectMapper mapper = new ObjectMapper();
+        Map dashBoardMap = XmlParser.getDashboardComponents();
+        String dashboardJson = mapper.writeValueAsString(dashBoardMap);
+        //log.info("archer dashboard json is :"+dashboardJson);
+        String liveConnectComponents =  liveConnectorParser.getLiveConnectMainDashboard(saSessionId,user);
+        //log.info("live dashboard json is :"+liveConnectComponents);
+        String finalJson = dashboardJson.substring(0,dashboardJson.length()-1).concat(","+liveConnectComponents.substring(1,liveConnectComponents.length()-1)).concat("}");
+        log.info("final mainDashboardJson is :\n"+finalJson);
+        return "{\n" +
+                "    \"success\": true,\n" +
+                "    \"data\":".concat(finalJson).concat("}");
+
     }
 
 }

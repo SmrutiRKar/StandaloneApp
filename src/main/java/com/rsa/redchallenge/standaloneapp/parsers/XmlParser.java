@@ -23,41 +23,56 @@ public class XmlParser {
 
     static String xpathExpression = new String("/Records");
 
-    static List<OpenRisk> openRisks = new LinkedList<OpenRisk>();
-    static List<LossImpact> losses = new LinkedList<LossImpact>();
-    static List<ComplianceRating> complianceRatings = new LinkedList<>();
-    static List<OpenRisk> threats = new LinkedList<>();
+    static Set<OpenRisk> openRisks = new LinkedHashSet<>();
+    static Set<LossImpact> losses = new LinkedHashSet<LossImpact>();
+    static Set<ComplianceRating> complianceRatings = new LinkedHashSet<>();
+    static Set<TopThreat> threats = new LinkedHashSet<>();
 
-    static List<OpenRiskDetails> openRiskDetails = new LinkedList<OpenRiskDetails>();
-    static List<LossImpactDetails> lossImpactDetails = new LinkedList<LossImpactDetails>();
+    static Set<OpenRiskDetails> openRiskDetails = new LinkedHashSet<OpenRiskDetails>();
+    static Set<LossImpactDetails> lossImpactDetails = new LinkedHashSet<LossImpactDetails>();
     static List<ComplianceRatingDetails> complianceRatingDetails = new LinkedList<ComplianceRatingDetails>();
-    static List<TopThreatDetails> topThreatDetails = new LinkedList<TopThreatDetails>();
+    static Set<TopThreatDetails> topThreatDetails = new LinkedHashSet<TopThreatDetails>();
 
-    static List<OpenRiskDetails> riskDrillDownList = new ArrayList<OpenRiskDetails>();
-    static List<LossImpactDetails> lossDrillDownList = new ArrayList<LossImpactDetails>();
+    static Set<OpenRiskDetails> riskDrillDownList = new LinkedHashSet<OpenRiskDetails>();
+    static Set<LossImpactDetails> lossDrillDownList = new LinkedHashSet<LossImpactDetails>();
     static List<ComplianceRatingDetails> complianceDrillDownList = new LinkedList<ComplianceRatingDetails>();
     static List<TopThreatDetails> topThreatsDrillDownList = new LinkedList<TopThreatDetails>();
 
     public static void getxpathDetails(String result, RequestType requestType) throws XPathExpressionException {
-        InputStream is = new ByteArrayInputStream(result.getBytes());
-        XPath xpath = XPathFactory.newInstance().newXPath();
-        InputSource inputSource = new InputSource(is);
-        List<OpenRisk> openRisks = new ArrayList<OpenRisk>();
-        NodeList nodeList = (NodeList) xpath.evaluate(xpathExpression, inputSource, XPathConstants.NODESET);
-        for (int i = 0; i < nodeList.getLength(); i++) {
-            Node records = nodeList.item(i);
-            System.out.println("\nOuter Element :"
-                    + records.getNodeName());
-            for (int j = 0; j < records.getChildNodes().getLength(); j++) {
-                Node node = records.getChildNodes().item(j);
-                System.out.println("\nInner Element :"
-                        + node.getNodeName());
-                if (((DeferredElementNSImpl) node).getTagName().equals("Record")) {
-                    Element record = (Element) node;
-                    convertNodeToOject(record, requestType);
+        if(requestType.equals(RequestType.THREATREQUEST)){
+            //mock data for threat
+            TopThreat threat1 = new TopThreat("Critical",1);
+            TopThreat threat2 = new TopThreat("High",3);
+            TopThreat threat3 = new TopThreat("Medium",6);
+            TopThreat threat4 = new TopThreat("Low",0);
+            threats.add(threat1);threats.add(threat2);threats.add(threat3);threats.add(threat4);
+        } else {
+            InputStream is = new ByteArrayInputStream(result.getBytes());
+            XPath xpath = XPathFactory.newInstance().newXPath();
+            InputSource inputSource = new InputSource(is);
+            NodeList nodeList = (NodeList) xpath.evaluate(xpathExpression, inputSource, XPathConstants.NODESET);
+            for (int i = 0; i < nodeList.getLength(); i++) {
+                Node records = nodeList.item(i);
+               // System.out.println("\nOuter Element :"
+                       // + records.getNodeName());
+                for (int j = 0; j < records.getChildNodes().getLength(); j++) {
+                    Node node = records.getChildNodes().item(j);
+                    //System.out.println("\nInner Element :"
+                           // + node.getNodeName());
+                    if (((DeferredElementNSImpl) node).getTagName().equals("Record")) {
+                        Element record = (Element) node;
+                        convertNodeToOject(record, requestType);
+                    }
                 }
             }
         }
+    }
+    private static Float generateRandomRisk(){
+        return new Float(5 + (int)(Math.random() * ((100 - 5) + 1)));
+    }
+
+    private static long generateRandomLoss(){
+        return new Long(5000 + (int)(Math.random() * ((100000 - 5) + 1)));
     }
 
     private static void convertNodeToOject(Element record, RequestType requestType) {
@@ -66,25 +81,37 @@ public class XmlParser {
                 OpenRisk openRisk = new OpenRisk();
                 openRisk.setProjectName(record.getChildNodes().item(0).getTextContent());
                 String score = record.getChildNodes().item(1).getTextContent();
-                if (score != null && !score.isEmpty())
+                if (score != null && !score.isEmpty() && !score.equals("0"))
                     openRisk.setBusinessRiskScore(Float.valueOf(record.getChildNodes().item(1).getTextContent()));
-                else
-                    openRisk.setBusinessRiskScore(0F);
-                openRisks.add(openRisk);
+                else {
+                    openRisk.setBusinessRiskScore(generateRandomRisk());
+                }
+
+                if (openRisks.contains(openRisk)) {
+                    openRisks.remove(openRisk);
+                    openRisks.add(openRisk);
+                } else {
+                    openRisks.add(openRisk);
+                }
                 break;
             case LOSSREQUEST:
                 LossImpact lossImpact = new LossImpact();
                 lossImpact.setBusinessUnit(record.getChildNodes().item(0).getTextContent());
                 String amount = record.getChildNodes().item(1).getTextContent();
-                    lossImpact.setLossAmountInDollars((amount != null && !amount.isEmpty())?Long.valueOf(amount):0L);
-                losses.add(lossImpact);
+                    lossImpact.setLossAmountInDollars((amount != null && !amount.isEmpty())?Long.valueOf(amount):generateRandomLoss());
+                if (losses.contains(lossImpact)) {
+                    losses.remove(lossImpact);
+                    losses.add(lossImpact);
+                } else {
+                    losses.add(lossImpact);
+                }
                 break;
             case COMPLIANCEREQUEST:
                 ComplianceRating complianceRating1 = new ComplianceRating();
-                complianceRating1.setComplianceRating("open");
+                complianceRating1.setComplianceRating("Open");
                 complianceRating1.setCount(10L);
                 ComplianceRating complianceRating2 = new ComplianceRating();
-                complianceRating2.setComplianceRating("high");
+                complianceRating2.setComplianceRating("High");
                 complianceRating2.setCount(1L);
                 ComplianceRating complianceRating3 = new ComplianceRating();
                 complianceRating3.setComplianceRating("N/A");
@@ -103,14 +130,24 @@ public class XmlParser {
                 openRiskDetail.setExpectedStartDateInUTC(record.getChildNodes().item(3).getTextContent());
                 openRiskDetail.setExpectedEndDateInUTC(record.getChildNodes().item(4).getTextContent());
                 openRiskDetail.setRiskDescription(record.getChildNodes().item(5).getTextContent());
-                openRiskDetails.add(openRiskDetail);
+                if (openRiskDetails.contains(openRiskDetail)) {
+                    openRiskDetails.remove(openRiskDetail);
+                    openRiskDetails.add(openRiskDetail);
+                } else {
+                    openRiskDetails.add(openRiskDetail);
+                }
                 break;
             case LOSSDRILLDOWNREQUEST:
                 LossImpactDetails lossImpactDetail = new LossImpactDetails();
                 lossImpactDetail.setBusinessUnit(record.getChildNodes().item(0).getTextContent());
                 lossImpactDetail.setBusinessUnitManager(record.getChildNodes().item(1).getTextContent());
                 lossImpactDetail.setReviewTaskDescription(record.getChildNodes().item(2).getTextContent());
-                lossImpactDetails.add(lossImpactDetail);
+                if (lossImpactDetails.contains(lossImpactDetail)) {
+                    lossImpactDetails.remove(lossImpactDetail);
+                    lossImpactDetails.add(lossImpactDetail);
+                } else {
+                    lossImpactDetails.add(lossImpactDetail);
+                }
                 break;
             case COMPLIANCEDRILLDOWNREQUEST:
                 break;
@@ -141,7 +178,7 @@ public class XmlParser {
                     resultMap.put("OpenRisks", openRisks);
                     resultMap.put("Losses", losses);
                     resultMap.put("ComplianceRatings",complianceRatings);
-                   // resultMap.put("Threats",threats);
+                    resultMap.put("Threats",threats);
                     mapper.writeValue(out, resultMap);
                     break;
             }
@@ -152,7 +189,23 @@ public class XmlParser {
 
     }
 
-    public void findLossDrillDown(String requestParams) {
+
+    public static Map getDashboardComponents() {
+        Map dashboardMap = new HashMap<String, Object>();
+        try {
+            dashboardMap.put("OpenRisks", openRisks);
+            dashboardMap.put("Losses", losses);
+            dashboardMap.put("ComplianceRatings", complianceRatings);
+            dashboardMap.put("Threats",threats);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return dashboardMap;
+        }
+        return dashboardMap;
+    }
+
+    public static void findLossDrillDown(String requestParams) {
+        riskDrillDownList.clear();
         openRiskDetails.forEach(openRiskDetail ->
         {
             if (openRiskDetail.getProjectName().equalsIgnoreCase(requestParams)) {
@@ -161,7 +214,8 @@ public class XmlParser {
         });
     }
 
-    public void findRiskDrillDown(String requestParams) {
+    public static void findRiskDrillDown(String requestParams) {
+        lossDrillDownList.clear();
         lossImpactDetails.forEach(lossImpactDetail ->
         {
             if (lossImpactDetail.getBusinessUnit().equalsIgnoreCase(requestParams)) {
@@ -171,7 +225,7 @@ public class XmlParser {
 
     }
 
-    public void findComplianceDrillDown(String requestParams) {
+    public static void findComplianceDrillDown(String requestParams) {
         complianceRatingDetails.forEach(complianceRatingDetail ->
         {
             if (complianceRatingDetail.getComplianceRating().equalsIgnoreCase(requestParams)) {
@@ -181,7 +235,7 @@ public class XmlParser {
 
     }
 
-    public void findThreatDrillDown(String requestParams) {
+    public static void findThreatDrillDown(String requestParams) {
         topThreatsDrillDownList.forEach(threatDetail ->
         {
            /* if (threatDetail..equalsIgnoreCase(requestParams)) {

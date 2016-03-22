@@ -24,4 +24,20 @@ public class OpenRisk {
     }
 
     Float businessRiskScore;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        OpenRisk openRisk = (OpenRisk) o;
+
+        return projectName.equals(openRisk.projectName);
+
+    }
+
+    @Override
+    public int hashCode() {
+        return projectName.hashCode();
+    }
 }

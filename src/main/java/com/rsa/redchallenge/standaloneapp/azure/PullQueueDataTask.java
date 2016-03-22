@@ -118,5 +118,4 @@ public class PullQueueDataTask implements Runnable {
         }
     }
 
-
 }

@@ -65,5 +65,19 @@ public class OpenRiskDetails {
 
     String riskDescription;
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
 
+        OpenRiskDetails that = (OpenRiskDetails) o;
+
+        return projectName.equals(that.projectName);
+
+    }
+
+    @Override
+    public int hashCode() {
+        return projectName.hashCode();
+    }
 }

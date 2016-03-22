@@ -24,6 +24,19 @@ public class LossImpact {
         this.lossAmountInDollars = lossAmountInDollars;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
 
+        LossImpact that = (LossImpact) o;
 
+        return businessUnit.equals(that.businessUnit);
+
+    }
+
+    @Override
+    public int hashCode() {
+        return businessUnit.hashCode();
+    }
 }

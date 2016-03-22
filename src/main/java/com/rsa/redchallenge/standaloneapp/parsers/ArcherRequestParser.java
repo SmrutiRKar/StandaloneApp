@@ -42,7 +42,7 @@ public class ArcherRequestParser {
 
         if (con.getResponseCode() == 200) {
             result = IOUtils.toString(con.getInputStream(), "UTF-8");
-            System.out.println(result);
+            //System.out.println(result);
         } else {
             error = IOUtils.toString(con.getErrorStream(), "UTF-8");
             System.out.println("\nArcher Response Error: " + error);

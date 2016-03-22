@@ -22,4 +22,20 @@ public class ComplianceRating {
     public void setCount(Long count) {
         this.count = count;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        ComplianceRating that = (ComplianceRating) o;
+
+        return complianceRating.equals(that.complianceRating);
+
+    }
+
+    @Override
+    public int hashCode() {
+        return complianceRating.hashCode();
+    }
 }
