@@ -98,7 +98,8 @@ public class ParseRequestFactory {
             PushQueueDataTask.initQueue(PushQueueDataTask.populateResponseObject(success,errorMessage,responseForQueue));
         } catch (Exception e) {
            log.error("failed to process request from mobile : ",e);
-            PushQueueDataTask.initQueue(PushQueueDataTask.populateResponseObject(success,e.getMessage(),responseForQueue));
+            String errorMsg = (e.getMessage()!= null && !e.getMessage().isEmpty()) ? e.getMessage() : "Failed to fetch data - Server Error";
+            PushQueueDataTask.initQueue(PushQueueDataTask.populateResponseObject(success,errorMsg,responseForQueue));
         }
     }
 

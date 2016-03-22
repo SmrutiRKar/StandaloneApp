@@ -1,14 +1,18 @@
 package com.rsa.redchallenge.standaloneapp.rest;
 
+import com.rsa.redchallenge.standaloneapp.azure.ParseRequestFactory;
+import com.rsa.redchallenge.standaloneapp.model.AzureRequestObject;
 import com.rsa.redchallenge.standaloneapp.utils.LoginLogoutHelper;
 import com.rsa.redchallenge.standaloneapp.utils.RestInteractor;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.codehaus.jettison.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.context.ApplicationContext;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.servlet.http.HttpServletRequest;
@@ -22,6 +26,9 @@ public class RestController {
 
     @Autowired
     ApplicationContext applicationContext;
+
+    @Autowired
+    private ParseRequestFactory parseRequestFactory;
 
     final static Log logger = LogFactory.getLog(RestController.class);
 
@@ -49,5 +56,25 @@ public class RestController {
             e.printStackTrace();
         }
         return "Test message from Ios Standalone Server";
+    }
+
+    @RequestMapping(value = "/testios", method = RequestMethod.GET)
+    @ResponseBody
+    public String testios(HttpServletRequest request,@RequestParam(value = "payload", required = false) String payload) {
+
+        try {
+            JSONObject jsonObj = new JSONObject(payload);
+            AzureRequestObject azureRequestObject = new AzureRequestObject();
+            azureRequestObject.setRequestOperation(jsonObj.getString("requestOperation"));
+            azureRequestObject.setRequestParams(jsonObj.getString("requestParams"));
+            azureRequestObject.setRequestPayload(jsonObj.getString("requestPayload"));
+            azureRequestObject.setRequestUser(jsonObj.getString("requestUser"));
+            System.out.println("processing the request for mobile request: "+azureRequestObject);
+            parseRequestFactory.parse(azureRequestObject);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return e.toString();
+        }
+            return "call successfully";
     }
 }
